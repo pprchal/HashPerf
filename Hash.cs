@@ -43,9 +43,10 @@ public class Hash
     [Arguments(ScriptOnlyC)]
     public int ArrayLookup_LinqAny(string script) 
     {
+        var items = CreateABCArray();
         return ExecuteScript(
             script,
-            (line) => CreateABCArray().Any(item => item.IsMatch(line))
+            (line) => items.Any(item => item.IsMatch(line))
         );
     }
 
@@ -55,9 +56,11 @@ public class Hash
     [Arguments(ScriptOnlyC)]
     public int ArrayLookup_Foreach(string script) 
     {
+        var items = CreateABCArray();
+
         return ExecuteScript(script, (line) =>
         {
-            foreach(var item in CreateABCArray())
+            foreach(var item in items)
             {
                 if(item.IsMatch(line))
                 {
@@ -75,9 +78,10 @@ public class Hash
     [Arguments(ScriptOnlyC)]
     public int ArrayLookup_For(string script) 
     {
+        var items = CreateABCArray();
+
         return ExecuteScript(script, (line) =>
         {
-            var items = CreateABCArray();
             for(var n = 0; n < items.Length; n++)
             {
                 if(items[n].IsMatch(line))

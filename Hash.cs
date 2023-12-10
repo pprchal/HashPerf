@@ -2,7 +2,7 @@ using BenchmarkDotNet.Attributes;
 
 public class Hash
 {
-    static int ExecuteScript(string script, Func<string, bool> exec)
+    public static int ExecuteScript(string script, Func<string, bool> exec)
     {
         var total = 0;
         foreach(var scriptLine in script.Split(new char[] { ',' }))
@@ -21,7 +21,7 @@ public class Hash
 
     [Benchmark]
     [Arguments("10*a,1*b,1*c,1000*b,200*a")]
-    public void ArrayLookup(string script) 
+    public int ArrayLookup(string script) 
     {
         var Items_Array = new Item[]
         {
@@ -30,7 +30,7 @@ public class Hash
             new("c")
         };
 
-        var total = ExecuteScript(script, (line) =>
+        return ExecuteScript(script, (line) =>
         {
             var found = Items_Array.Any(item => item.IsMatch(line));
             return found;
@@ -39,13 +39,13 @@ public class Hash
 
     [Benchmark]
     [Arguments("10*a,1*b,1*c,1000*b,200*a")]
-    public void HashLookup(string script)
+    public int HashLookup(string script)
     {
         var Items_Dictionary = new Dictionary<string, Item>();
 
-        ExecuteScript(script, (line) =>
+        return ExecuteScript(script, (line) =>
         {
-            if(Items_Dictionary[line] == null)
+            if(!Items_Dictionary.ContainsKey(line))
             {
                 Items_Dictionary[line] = new Item(line);
             }

@@ -6,7 +6,7 @@ class Item
         Pattern = pattern;
     }
 
-    bool IsMatch(string line)
+    public bool IsMatch(string line)
     {
         return line == Pattern;
     }

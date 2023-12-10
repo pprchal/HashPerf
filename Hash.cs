@@ -3,7 +3,7 @@ using BenchmarkDotNet.Attributes;
 public class Hash
 {
     // random scenario
-    const string ScriptRandom = "100*a,10*c,50*a,50*c,1*b,200*a,2*b,100*a";
+    const string ScriptRandom = "100*a,10*c,50*a,50*c,1*b,200*a,2*b,30*c";
 
     // best scenario for array (first item)
     const string ScriptOnlyA = "100*a";
@@ -53,18 +53,6 @@ public class Hash
     [Arguments(ScriptRandom)]
     [Arguments(ScriptOnlyA)]
     [Arguments(ScriptOnlyC)]
-    public int ArrayLookup_LinqFirstOrDefault(string script) 
-    {
-        return ExecuteScript(
-            script,
-            (line) => CreateABCArray().FirstOrDefault(item => item.IsMatch(line)) != null
-        );
-    }
-
-    [Benchmark]
-    [Arguments(ScriptRandom)]
-    [Arguments(ScriptOnlyA)]
-    [Arguments(ScriptOnlyC)]
     public int ArrayLookup_Foreach(string script) 
     {
         return ExecuteScript(script, (line) =>
@@ -85,8 +73,35 @@ public class Hash
     [Arguments(ScriptRandom)]
     [Arguments(ScriptOnlyA)]
     [Arguments(ScriptOnlyC)]
+    public int ArrayLookup_For(string script) 
+    {
+        return ExecuteScript(script, (line) =>
+        {
+            var items = CreateABCArray();
+            for(var n = 0; n < items.Length; n++)
+            {
+                if(items[n].IsMatch(line))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        });
+    }
+
+    [Benchmark]
+    [Arguments(ScriptRandom)]
+    [Arguments(ScriptOnlyA)]
+    [Arguments(ScriptOnlyC)]
     public int HashLookup_PrimaryKey(string script)
     {
+        // this is doublethink case:
+        // cached key is fast, but you loose access to your interface
+        //      all info must be contained in key !
+        //      vs. return items[line].IsMatch(line);
+        //
+        // proceed results with caution!
         var items = new Dictionary<string, Item>();
 
         return ExecuteScript(script, (line) =>
@@ -97,10 +112,6 @@ public class Hash
             }
 
             return true;
-
-            // TODO: this is doublethink case:
-            // cached key is fast, but you loose access to your interface
-            // return items[line].IsMatch(line);
         });
     }
 

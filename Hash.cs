@@ -3,20 +3,23 @@ using BenchmarkDotNet.Attributes;
 public class Hash
 {
     // random scenario
-    const string ScriptRandom = "100*a,10*c,50*a,50*c,1*b,200*a,2*b,30*c";
+    const string ScriptRandom = "10*a,10*c,50*a,50*c,1*b,234*f,2*b,25*c,5*d,6*e,7*f";
 
     // best scenario for array (first item)
-    const string ScriptOnlyA = "100*a";
+    const string ScriptFirst = "100*a";
     
     // worst scenario for array (last item)
-    const string ScriptOnlyC = "100*c";
+    const string ScriptLast = "100*f";
     
     // imagine dispatch table with x as default value
-    static Item[] CreateABCArray() =>
+    static Item[] CreateItemsArray() =>
     [
         new("a"),
         new("b"),
         new("c"),
+        new("d"),
+        new("e"),
+        new("f"),
         new("x")
     ];
 
@@ -37,48 +40,26 @@ public class Hash
         return total;
     }
 
-    [Benchmark]
-    [Arguments(ScriptRandom)]
-    [Arguments(ScriptOnlyA)]
-    [Arguments(ScriptOnlyC)]
-    public int ArrayLookup_LinqAny(string script) 
-    {
-        var items = CreateABCArray();
-        return ExecuteScript(
-            script,
-            (line) => items.Any(item => item.IsMatch(line))
-        );
-    }
+    // [Benchmark]
+    // [Arguments(ScriptRandom)]
+    // [Arguments(ScriptFirst)]
+    // [Arguments(ScriptLast)]
+    // public int ArrayLookup_LinqAny(string script) 
+    // {
+    //     var items = CreateABCArray();
+    //     return ExecuteScript(
+    //         script,
+    //         (line) => items.Any(item => item.IsMatch(line))
+    //     );
+    // }
 
     [Benchmark]
     [Arguments(ScriptRandom)]
-    [Arguments(ScriptOnlyA)]
-    [Arguments(ScriptOnlyC)]
-    public int ArrayLookup_Foreach(string script) 
-    {
-        var items = CreateABCArray();
-
-        return ExecuteScript(script, (line) =>
-        {
-            foreach(var item in items)
-            {
-                if(item.IsMatch(line))
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        });
-    }
-
-    [Benchmark]
-    [Arguments(ScriptRandom)]
-    [Arguments(ScriptOnlyA)]
-    [Arguments(ScriptOnlyC)]
+    [Arguments(ScriptFirst)]
+    [Arguments(ScriptLast)]
     public int ArrayLookup_For(string script) 
     {
-        var items = CreateABCArray();
+        var items = CreateItemsArray();
 
         return ExecuteScript(script, (line) =>
         {
@@ -96,8 +77,8 @@ public class Hash
 
     [Benchmark]
     [Arguments(ScriptRandom)]
-    [Arguments(ScriptOnlyA)]
-    [Arguments(ScriptOnlyC)]
+    [Arguments(ScriptFirst)]
+    [Arguments(ScriptLast)]
     public int HashLookup_PrimaryKey(string script)
     {
         // this is doublethink case:
@@ -121,8 +102,8 @@ public class Hash
 
     [Benchmark]
     [Arguments(ScriptRandom)]
-    [Arguments(ScriptOnlyA)]
-    [Arguments(ScriptOnlyC)]
+    [Arguments(ScriptFirst)]
+    [Arguments(ScriptLast)]
     public int HashLookup_Full(string script)
     {
         var items = new Dictionary<string, Item>();
@@ -140,8 +121,8 @@ public class Hash
 
     [Benchmark]
     [Arguments(ScriptRandom)]
-    [Arguments(ScriptOnlyA)]
-    [Arguments(ScriptOnlyC)]
+    [Arguments(ScriptFirst)]
+    [Arguments(ScriptLast)]
     public int HashLookup_Full_TryGetValue(string script)
     {
         var items = new Dictionary<string, Item>();
